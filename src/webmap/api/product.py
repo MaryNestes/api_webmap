@@ -1,8 +1,7 @@
-
 from fastapi import APIRouter, Depends, Query
 from ..repositories.product import ProductRepository
 from .depends import get_main_repository
-from ..models.product import TypeProductOut, KindLvLIn, KindTypeIn, DateIn, TimeIn
+from ..models.product import TypeProductOut, DateIn, TimeIn, KindType, KindLvL, ValueOut
 
 router = APIRouter(
     prefix='/product',
@@ -24,24 +23,24 @@ async def get_all_time_coord(
     return await repo.get_all_time_coord(date)
 
 
-@router.get('/type', response_model=list[TypeProductOut])
+@router.get('/type', response_model=TypeProductOut)
 async def get_type_by_date(
         date: DateIn,
         time: TimeIn,
+        level: KindLvL,
         repo: ProductRepository = Depends(get_main_repository)
 ):
+    return await repo.get_type(date, time, level)
 
-    return await repo.get_type(date, time)
 
-
-@router.get('/test')
+@router.get('/value')
 async def get_by_lon_lat(
         lon: float,
         lat: float,
-        type_pr: KindTypeIn,
         date: DateIn,
         time: TimeIn,
-        level: KindLvLIn,
-        repo: ProductRepository = Depends(get_main_repository)):
-
-    return await repo.get_value_by_lon_lat(lon+180, lat+180, date, time, type_pr, level)
+        level: KindLvL,
+        tp: KindType,
+        repo: ProductRepository = Depends(get_main_repository)
+):
+    return await repo.get_value_by_lon_lat(lon, lat, date, time, level, tp)
