@@ -23,12 +23,43 @@ class KindType(str, Enum):
     VMP = 'VMP'
 
 
-class DateIn(str):
-    date: str = Query(regex='^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$')
+class DateIn:
+    def __init__(
+            self,
+            date: str = Query(regex='^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$')
+    ):
+        self.date = date
+
+class CommonTimeItemsIn(DateIn):
+    def __init__(
+            self,
+            level: KindLvL,
+            date: str,
+            time: str = Query(regex='^(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)$')
+    ):
+        super().__init__(date)
+        self.time = time
+        self.level = level
 
 
-class TimeIn(str):
-    time: str = Query(regex='^(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)$')
+class CommonProdItemsIn(CommonTimeItemsIn):
+    def __init__(
+            self,
+            level: KindLvL,
+            tp: KindType,
+            lon: float,
+            lat: float,
+            date: str,
+            time: str,
+    ):
+        super().__init__(date=date, time=time, level=level)
+        self.tp = tp
+        self.lon = self.round_coord(lon)
+        self.lat = self.round_coord(lat)
+
+    @classmethod
+    def round_coord(cls, value):
+        return round(round(value * 2) / 2, 1)
 
 
 class TypeProductOut(BaseModel):
